@@ -1,5 +1,12 @@
+from calendar import c
 from flask import Flask
+from network import *
+
 app = Flask(__name__)
+
+network = Network("wlan0mon")
+p = Process(target = channel_hopper)
+p.start()
 
 @app.route("/")
 def index():
