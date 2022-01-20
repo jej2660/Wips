@@ -31,10 +31,10 @@ class Network:
         self.aps = {}
         self.target = ""
         self.rssList = []
-    def updateApList(self):
-        self.hopStart()
+    def updateApList(self, p):
+        self.hopStart(p)
         sniff(iface=self.interface, prn=self.sniffAP, timeout=20)
-        self.hopStop()
+        self.hopStop(p)
 
     def getApList(self):
         ls = []
@@ -65,10 +65,10 @@ class Network:
     def setChannel(self, channel):
         exe = "iw dev %s set channel %d" % (self.interface, channel)
         os.system(exe)
-    def hopStop(self):
+    def hopStop(self, p):
         p.terminate()
         p.join()
-    def hopStart(self):
+    def hopStart(self, p):
         p.start()
     def sniffAP(self, pkt):
         if( (pkt.haslayer(Dot11Beacon) or pkt.haslayer(Dot11ProbeResp)) and not pkt[Dot11].addr3 in self.aps.keys()):
