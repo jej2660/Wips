@@ -19,7 +19,7 @@
         <script type="text/javascript">
             function show(){
                 $.ajax({
-                    url : "/test/ap",
+                    url : "/v1/ap",
                     data: {},
                     type: "GET",
                     dataType: "json",
@@ -125,7 +125,7 @@
                                 $.ajax({
                                     url: '/v1/deauth',
                                     type: 'GET',
-                                    data: {mac: mac, channel: ch, mode: 0},
+                                    data: {apmac: mac, channel: ch, mode: 0},
                                     dataType: 'json',
                                     success: function (result) {
                                         

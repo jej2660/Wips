@@ -10,6 +10,7 @@ attack_pool = []
 def attack_loop():
     while True:
         for ap in attack_pool:
+            print(ap)
             network.deAuth("",ap.bssid, ap.channel)
         time.sleep(1)
 
@@ -40,13 +41,17 @@ def getSignal():
     return str(value)
 @app.route("/v1/deauth", methods=["GET"])
 def requestDeauth():
-    mode = request.args.get("mode")
+    mode = int(request.args.get("mode"))
     if mode == 0:
         apmac = request.args.get("apmac")
         channel = int(request.args.get("channel"))
-        attack_pool.append(Ap("test", apmac, channel, "t"))
+        network.deAuth("",apmac, channel)
+        #print(apmac, channel)
+        #attack_pool.append(Ap("test", apmac, channel, "t"))
+        #print(attack_pool)
     elif mode == 1:
         attack_pool.clear()
+    return ""
 
 
 #Front-End test Code

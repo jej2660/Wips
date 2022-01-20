@@ -69,7 +69,7 @@
 
         function show(){
             $.ajax({
-                url : "/test/ap",
+                url : "/v1/ap",
                 data: {},
                 type: "GET",
                 dataType: "json",
@@ -130,7 +130,7 @@
 
         function requestData(index) {
             $.ajax({
-                url: '/test/signal',
+                url: '/v1/signal',
                 type: 'GET',
                 dataType: 'json',
                 data: {mac: mac[index], channel: ch[index]},
