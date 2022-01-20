@@ -1,0 +1,27 @@
+[
+	{
+		"ssid":"hello",
+		"bssid":"FF:FF:FF:FF:FF:FF",
+		"channel":"5"	
+	},
+	{
+		"ssid":"asdf",
+		"bssid":"FF:FF:FF:FF:FF:CF",
+		"channel":"6"
+	},
+	{
+		"ssid":"qwer",
+		"bssid":"FF:FF:FF:FF:FF:FD",
+		"channel":"3"
+	},
+	{
+		"ssid":"zxcv",
+		"bssid":"FF:FF:FF:FF:FF:AF",
+		"channel":"7"	
+	},
+	{
+		"ssid":"hgasdf",
+		"bssid":"FF:FF:FF:FF:FF:FA",
+		"channel":"9"	
+	}
+]
