@@ -50,9 +50,9 @@
 
             <select id="select">
             </select>
-
+            
             <input type="button" class="btn btn-outline btn-primary pull-right" value="새로고침" onclick="show()"/> 
-            <input type="button" class="btn btn-outline btn-primary pull-right" value="select" onclick="getvalue()"/> 
+            <input type="button" class="btn btn-outline btn-primary pull-right" value="select" onclick="getindex()"/> 
             <figure>
                 <div calss="container-fluid">
                     <div class="row">
@@ -93,41 +93,16 @@
 
         show();
         
-        var index;
+        var chart;
         function getindex(){
             var tmp = document.getElementById('select');
-            index = tmp.selectIndex;
-        }
-        
-        var chart;
-        function requestData() {
-            $.ajax({
-                url: '/test/signal',
-                type: 'GET',
-                dataType: 'json',
-                data: {mac: mac[index], channel: ch[index]},
-                success: function (point) {
-                    console.log(point)
-                    var series = chart.series[0], shift = series.data.length > 20;
-                    let timestamp = + new Date()
-                    timestamp += 32400000;
-                    let data = [timestamp, Number(point)];
-
-                    chart.series[0].addPoint(data, true, shift);
-
-                    setTimeout(requestData, 1000);
-                },
-                cache: false
-            });
-        }
-
-        $(document).ready(function () {
+            let index = tmp.selectedIndex;
             chart = new Highcharts.Chart({
                 chart: {
                     renderTo: 'container',
                     defaultSeriesType: 'spline',
                     events: {
-                        load: requestData
+                        load: requestData(index)
                     }
                 },
                 title: {
@@ -135,7 +110,7 @@
                 },
                 xAxis: {
                     type: 'datetime',
-                    tickPixelInterval: 150,
+                    tickPixelInterval: 100,
                     maxZoom: 20 * 1000
                 },
                 yAxis: {
@@ -151,7 +126,27 @@
                     data: []
                 }]
             });
-        });
+        }
+
+        function requestData(index) {
+            $.ajax({
+                url: '/test/signal',
+                type: 'GET',
+                dataType: 'json',
+                data: {mac: mac[index], channel: ch[index]},
+                success: function (point) {
+                    console.log(point)
+                    var series = chart.series[0], shift = series.data.length > 20;
+                    let timestamp = + new Date()
+                    timestamp += 32400000;
+                    let data = [timestamp, Number(point)];
+
+                    chart.series[0].addPoint(data, true, shift);
+                    setTimeout(requestData, 1000, index);
+                },
+                cache: false
+            });
+        }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"

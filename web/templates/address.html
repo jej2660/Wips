@@ -109,27 +109,47 @@
                             </tbody>
                         </table> 
                         <input type="button" class="btn btn-outline btn-primary pull-right" value="새로고침" onclick="show()"/>
-                        <button type="button" class="btn btn-outline btn-primary pull-right" id="selectBtn">select</button>
+                        <button type="button" class="btn btn-danger" id="selectBtn">차단</button>
+                        <button type="button" class="btn btn-warning" id="delete">초기화</button>
                     </div> 
                     <script>
                         $("#selectBtn").click(function(){ 
-                            var tdArr = new Array();
-                 
                             var checkbox = $("input[name=user_CheckBox]:checked");
                             
                             checkbox.each(function(i) {
                                 var tr = checkbox.parent().parent().eq(i);
                                 var td = tr.children();
                                 
-                                var userid = td.eq(2).text();
-                                
-                                tdArr.push(userid);
+                                var mac = td.eq(2).text();
+                                var ch = td.eq(3).text();
+                                $.ajax({
+                                    url: '/v1/deauth',
+                                    type: 'GET',
+                                    data: {mac: mac, channel: ch, mode: 0},
+                                    dataType: 'json',
+                                    success: function (result) {
+                                        
+                                    },
+                                    cache: false
+                                });
                             });
-                            $("#Result").html(tdArr);    
                         });
+
+                        $("#delete").click(function(){ 
+                            $.ajax({
+                                url: '/v1/deauth',
+                                type: 'GET',
+                                data: {mode: 1},
+                                dataType: 'json',
+                                success: function (result) {
+                                        
+                                },
+                                cache: false
+                            });
+                        });
+                        
                     </script>
                 </div>
-                <div id="Result"></div> 
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
