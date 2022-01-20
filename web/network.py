@@ -1,5 +1,4 @@
-from operator import ne
-import sys, os, signal
+import sys, os, signal,json
 from multiprocessing import Process
 from scapy.layers.dot11 import Dot11, Dot11Beacon, Dot11ProbeResp,Dot11Elt
 from scapy.all import *
@@ -31,6 +30,7 @@ class Network:
         self.aps = {}
         self.target = ""
         self.rssList = []
+        self.attackAP = []
     def updateApList(self, p):
         self.hopStart(p)
         sniff(iface=self.interface, prn=self.sniffAP, timeout=20)
@@ -40,14 +40,21 @@ class Network:
         ls = []
         for data in self.aps.keys():
             ls.append(self.aps[data].getApInfo())
+        
         return ls
 
     def getPowerData(self, adr, channel):
+        print(adr, channel)
         self.target = adr
         self.rssList = []
         self.setChannel(channel)
         sniff(iface=self.interface, prn=self.getRssi, count=100)
-        return  sum(self.rssList) / len(self.rssList)
+        res = -100
+        try:
+            res = sum(self.rssList) / len(self.rssList)
+        except:
+            res = -100
+        return  res
 
     def getRssi(self, pkt):
         if pkt.haslayer(Dot11):
@@ -83,7 +90,7 @@ class Network:
             else: enc  = 'N'
 
             # Save discovered AP
-            self.aps[pkt[Dot11].addr3] = Ap(ssid, bssid, channel, enc)
+            self.aps[pkt[Dot11].addr3] = Ap(str(ssid), str(bssid), str(channel), enc)
 
             # Display discovered AP    
             print ("%02d  %s  %s %s" % (int(channel), enc, bssid, ssid))
@@ -98,15 +105,10 @@ if __name__ == "__main__":
     p = Process(target = channel_hopper)
 
     network = Network("wlan0mon")
-    network.hopStart()
-    #network.target = "90:9f:33:6f:52:86"
-    network.getPowerData("fc:7f:f1:ae:80:e0")
-    network.hopStop()
     print("set channel")
-    network.setChannel(11)
-    network.getPowerData("fc:7f:f1:ae:80:e0")
-    network.hopStop()
-    
+    print("dar", network.getPowerData("fc:7f:f1:b0:55:80", 6))
+#    network.getPowerData("fc:7f:f1:ae:80:e0", 11)
+
     #network.updateApList()
     #print(network.getApList())
     #p2 = Process(target=network.getPowerData)
