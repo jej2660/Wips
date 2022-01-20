@@ -1,3 +1,4 @@
+from operator import ne
 import sys, os, signal
 from multiprocessing import Process
 from scapy.layers.dot11 import Dot11, Dot11Beacon, Dot11ProbeResp,Dot11Elt
@@ -8,8 +9,8 @@ def channel_hopper():
             try:
                 channel = random.randrange(1,14)
                 exe = "iw dev %s set channel %d" % ("wlan0mon", channel)
-                #print(exe)
                 os.system(exe)
+                print(exe)
                 time.sleep(1)
             except KeyboardInterrupt:
                 break
@@ -22,7 +23,7 @@ class Ap:
         self.channel = channel
         self.enc = enc
     def getApInfo(self):
-        return [self.ssid, self.bssid, self.channel]
+        return {"ssid":self.ssid,"bssid":self.bssid,"channel":self.channel}
 
 class Network:
     def __init__(self, interface):
@@ -31,15 +32,22 @@ class Network:
         self.target = ""
         self.rssList = []
     def updateApList(self):
-        sniff(iface=self.interface, prn=self.sniffAP, timeout=10)
+        self.hopStart()
+        sniff(iface=self.interface, prn=self.sniffAP, timeout=20)
+        self.hopStop()
 
     def getApList(self):
-        return self.aps
+        ls = []
+        for data in self.aps.keys():
+            ls.append(self.aps[data].getApInfo())
+        return ls
 
-    def getPowerData(self, adr):
+    def getPowerData(self, adr, channel):
         self.target = adr
         self.rssList = []
+        self.setChannel(channel)
         sniff(iface=self.interface, prn=self.getRssi, count=100)
+        return  sum(self.rssList) / len(self.rssList)
 
     def getRssi(self, pkt):
         if pkt.haslayer(Dot11):
@@ -52,8 +60,16 @@ class Network:
                         except:
                             rssi = -100
                         print(rssi)
-                        
+                        self.rssList.append(rssi)
 
+    def setChannel(self, channel):
+        exe = "iw dev %s set channel %d" % (self.interface, channel)
+        os.system(exe)
+    def hopStop(self):
+        p.terminate()
+        p.join()
+    def hopStart(self):
+        p.start()
     def sniffAP(self, pkt):
         if( (pkt.haslayer(Dot11Beacon) or pkt.haslayer(Dot11ProbeResp)) and not pkt[Dot11].addr3 in self.aps.keys()):
             ssid       = pkt[Dot11Elt].info
@@ -80,14 +96,21 @@ if __name__ == "__main__":
 
     # Start the channel hopper
     p = Process(target = channel_hopper)
-    p.start()
 
     network = Network("wlan0mon")
+    network.hopStart()
     #network.target = "90:9f:33:6f:52:86"
-    print(network.getPowerData("90:9f:33:6f:52:86"))
-    p.terminate()
-    p.join()
+    network.getPowerData("fc:7f:f1:ae:80:e0")
+    network.hopStop()
+    print("set channel")
+    network.setChannel(11)
+    network.getPowerData("fc:7f:f1:ae:80:e0")
+    network.hopStop()
+    
+    #network.updateApList()
+    #print(network.getApList())
     #p2 = Process(target=network.getPowerData)
     #p2.start()
     # Start the sniffer
+
     #sniff(iface=network.interface, prn=network.sniffAP)
