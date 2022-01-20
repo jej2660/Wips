@@ -19,56 +19,54 @@
         <script type="text/javascript">
             function show(){
                 $.ajax({
-                    url : "/test.json",
+                    url : "/test/ap",
+                    data: {},
                     type: "GET",
-                    dataType: 'json', 
+                    dataType: "json",
                     success: function(result){
                         let ssid = new Array();
                         let mac = new Array();
                         let ch = new Array();
                         
-                        let json = JSON.parse(result);
-                    
-                        for(i=0; i<json.length; i++){ // 값 전체 가져오는법
-                            ssid[i] = json[i].ssid;
-                            mac[i] = json[i].bssid;
-                            ch[i] = json[i].channel;
+                        for(i=0; i<result.length; i++){ 
+                            mac[i] = result[i].bssid;
+                            ch[i] = result[i].channel;
+                            ssid[i] = result[i].ssid;
                         }
-                        let table = document.getElementById('datatablesSimple');
-                    
-                        for(i=0; i<arrTitle.length + 1; i++){
+                        let table = document.getElementById('tbodytmp');
+
+                        $('#datatablesSimple > tbody').empty()
+
+                        for(i=0; i<result.length + 1; i++){
                             let tr = document.createElement("tr");
 
                             let td0 = document.createElement("td");
-                            td0.appendChild("<input type=\"checkbox\" name=\"user_CheckBox\">")	
+                            var checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.name = "user_CheckBox";
+                            td0.appendChild(checkbox);
 
                             let td1 = document.createElement("td");			  
-                            td1.appendChild(document.createTextNode(arrTitle[i] + ""));
-                            
+                            td1.appendChild(document.createTextNode(ssid[i] + ""));
+                                
                             let td2 = document.createElement("td");			 
-                            td2.appendChild(document.createTextNode(arrAuthor[i] + ""));
-                            
+                            td2.appendChild(document.createTextNode(mac[i] + ""));
+                                
                             let td3 = document.createElement("td");			 
-                            td3.appendChild(document.createTextNode(arrPrice[i]+ ""));
-                            
+                            td3.appendChild(document.createTextNode(ch[i]+ ""));
+                                
                             tr.appendChild(td0);
                             tr.appendChild(td1);
                             tr.appendChild(td2);
                             tr.appendChild(td3);
-                            
+                                
                             table.appendChild(tr);
                         }
-
-                        setTimeout(show, 5000);
-                    },
-                    error:function(){  
-                        
                     }
                 })
             };
             </script>
         <div class="d-flex" id="wrapper">
-            <!-- Sidebar-->
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">WIPS</div>
                 <div class="list-group list-group-flush">
@@ -77,9 +75,7 @@
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/signal">Signal Strength</a>
                 </div>
             </div>
-            <!-- Page content wrapper-->
             <div id="page-content-wrapper">
-                <!-- Top navigation-->
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
                     <div class="container-fluid">
                         <button class="btn btn-primary" id="sidebarToggle"><span class="navbar-toggler-icon"></span></button>
@@ -108,42 +104,30 @@
                                     <th>Channel</th>
                                 </tr>
                             </tfoot>
-                            <tbody>
+                            <tbody id="tbodytmp">
                                 <tr>
-                                    <td><input type="checkbox" name="user_CheckBox"></td>
-                                    <td>hello</td>
-                                    <td>FF:FF:FF:FF:FF:FF</td>
-                                    <td>52</td>
-                                </tr>
-                                
-                                <tr>
-                                    <td><input type="checkbox" name="user_CheckBox"></td>
-                                    <td>hello</td>
-                                    <td>FF:FF:FF:FF:FF:FF</td>
-                                    <td>52</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                             </tbody>
                         </table> 
+                        <input type="button" class="btn btn-outline btn-primary pull-right" value="새로고침" onclick="show()"/>
                         <button type="button" class="btn btn-outline btn-primary pull-right" id="selectBtn">select</button>
                     </div> 
                     <script>
-                        // 상단 선택버튼 클릭시 체크된 Row의 값을 가져온다.
                         $("#selectBtn").click(function(){ 
                             var tdArr = new Array();
                  
                             var checkbox = $("input[name=user_CheckBox]:checked");
                             
-                            // 체크된 체크박스 값을 가져온다
                             checkbox.each(function(i) {
-                                // checkbox.parent() : checkbox의 부모는 <td>이다.
-                                // checkbox.parent().parent() : <td>의 부모이므로 <tr>이다.
                                 var tr = checkbox.parent().parent().eq(i);
                                 var td = tr.children();
                                 
-                                // td.eq(0)은 체크박스 이므로  td.eq(1)의 값부터 가져온다.
                                 var userid = td.eq(2).text()+", ";
                                 
-                                // 가져온 값을 배열에 담는다.
                                 tdArr.push(userid);
                             });
                             $("#Result").html(tdArr);    
