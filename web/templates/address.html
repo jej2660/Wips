@@ -35,15 +35,16 @@
                         }
                         let table = document.getElementById('tbodytmp');
 
-                        $('#datatablesSimple > tbody').empty()
+                        $('#datatable > tbody').empty()
 
                         for(i=0; i<result.length + 1; i++){
                             let tr = document.createElement("tr");
 
                             let td0 = document.createElement("td");
                             var checkbox = document.createElement("input");
-                            checkbox.type = "checkbox";
+                            checkbox.type = "radio";
                             checkbox.name = "user_CheckBox";
+                            checkbox.value = "";
                             td0.appendChild(checkbox);
 
                             let td1 = document.createElement("td");			  
@@ -87,7 +88,7 @@
                         MAC Address
                     </div>
                     <div class="card-body">
-                        <table id="datatablesSimple">
+                        <table id="datatable" class="table">
                             <thead>
                                 <tr>
                                     <th>select</th>
@@ -96,14 +97,6 @@
                                     <th>Channel</th>
                                 </tr>
                             </thead>
-                            <tfoot>
-                                <tr>
-                                    <th>select</th>
-                                    <th>SSID</th>
-                                    <th>MAC</th>
-                                    <th>Channel</th>
-                                </tr>
-                            </tfoot>
                             <tbody id="tbodytmp">
                                 <tr>
                                     <td></td>
@@ -126,7 +119,7 @@
                                 var tr = checkbox.parent().parent().eq(i);
                                 var td = tr.children();
                                 
-                                var userid = td.eq(2).text()+", ";
+                                var userid = td.eq(2).text();
                                 
                                 tdArr.push(userid);
                             });
