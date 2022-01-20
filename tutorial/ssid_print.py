@@ -1,19 +1,75 @@
+# airoscapy.py - Wireless AP scanner based on scapy
+# version: 0.2
+# Author: iphelix
+import sys, os, signal
+from multiprocessing import Process
+from scapy.layers.dot11 import Dot11, Dot11Beacon, Dot11ProbeResp,Dot11Elt
 from scapy.all import *
-from scapy.layers.dot11 import Dot11
 
-ap = []
+interface='' # monitor interface
+aps = {} # dictionary to store unique APs
 
-def findAP(pkt):
-    if pkt.haslayer(Dot11):
-        print(pkt)
-        if pkt.type == 0 and pkt.subtype == 8:
-            if pkt.addr2 not in ap:
-                ap.append(pkt.addr2)
-                print("AP MAC : %s with SSID : %s" % (pkt.addr2, pkt.info))
+# process unique sniffed Beacons and ProbeResponses. 
+def sniffAP(p):
+    if ( (p.haslayer(Dot11Beacon) or p.haslayer(Dot11ProbeResp)) 
+                 and not p[Dot11].addr3 in aps.keys()):
+        ssid       = p[Dot11Elt].info
+        bssid      = p[Dot11].addr3    
+        channel    = int( ord(p[Dot11Elt:3].info))
+        capability = p.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}\
+                {Dot11ProbeResp:%Dot11ProbeResp.cap%}")
+        
+        # Check for encrypted networks
+        if re.search("privacy", capability): enc = 'Y'
+        else: enc  = 'N'
 
+        # Save discovered AP
+        aps[p[Dot11].addr3] = enc
 
+        # Display discovered AP    
+        print ("%02d  %s  %s %s" % (int(channel), enc, bssid, ssid))
 
+# Channel hopper
+def channel_hopper():
+    while True:
+        try:
+            channel = random.randrange(1,14)
+            exe = "iw dev %s set channel %d" % (interface, channel)
+            print(exe)
+            os.system(exe)
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
 
+# Capture interrupt signal and cleanup before exiting
+def signal_handler(signal, frame):
+    p.terminate()
+    p.join()
+
+    print ("\n-=-=-=-=-=  STATISTICS =-=-=-=-=-=-")
+    print ("Total APs found: %d" % len(aps))
+    print ("Encrypted APs  : %d" % len([ap for ap in aps if aps[ap] =='Y']))
+    print ("Unencrypted APs: %d" % len([ap for ap in aps if aps[ap] =='N']))
+
+    sys.exit(0)
 
 if __name__ == "__main__":
-    sniff(iface="en0", prn=findAP, monitor=True)
+    if len(sys.argv) != 2:
+        print ("Usage %s monitor_interface" % sys.argv[0])
+        sys.exit(1)
+
+    interface = sys.argv[1]
+
+    # Print the program header
+    print ("-=-=-=-=-=-= AIROSCAPY =-=-=-=-=-=-")
+    print ("CH ENC BSSID             SSID")
+
+    # Start the channel hopper
+    p = Process(target = channel_hopper)
+    p.start()
+
+    # Capture CTRL-C
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Start the sniffer
+    sniff(iface=interface,prn=sniffAP)

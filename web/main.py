@@ -1,18 +1,18 @@
 from calendar import c
-from flask import Flask
+from flask import Flask, render_template
 from network import *
 
 app = Flask(__name__)
 
 network = Network("wlan0mon")
 p = Process(target = channel_hopper)
-p.start()
+
 
 @app.route("/")
 def index():
-    return "Hello World!"
+    return render_template("index.html")
 
-@app.route("/ap", method="GET")
+@app.route("/ap")
 def getAp():
     return "getAP"
 
