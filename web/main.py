@@ -6,6 +6,15 @@ app = Flask(__name__)
 
 network = Network("wlan0mon")
 p = Process(target = channel_hopper)
+attack_pool = []
+def attack_loop():
+    while True:
+        for ap in attack_pool:
+            network.deAuth("",ap.bssid, ap.channel)
+        time.sleep(1)
+
+attackp = Process(target=attack_loop)
+
 
 
 @app.route("/")
@@ -32,10 +41,14 @@ def getSignal():
 @app.route("/v1/deauth", methods=["GET"])
 def requestDeauth():
     mode = request.args.get("mode")
+    if mode == 0:
+        apmac = request.args.get("apmac")
+        channel = int(request.args.get("channel"))
+        attack_pool.append(Ap("test", apmac, channel, "t"))
+    elif mode == 1:
+        attack_pool.clear()
 
-    apmac = request.args.get("apmac")
-    smac = request.args.get("smac")
-    channel = int(request.args.get("channel"))
+
 #Front-End test Code
 @app.route("/test/signal")
 def testSignal():
@@ -47,4 +60,5 @@ def testRequestAp():
 
 
 if __name__ == "__main__":
+    attackp.start()
     app.run()
