@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>WIPS Setting Page</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <script>
+            function add(tableid){
+                var table = document.getElementById(tableid);
+                var rowlen = table.rows.length;
+                var row = table.insertRow(rowlen-1);
+                row.insertCell(0).innerHTML = "<td><input type=\"checkbox\" name=\"user_CheckBox\"></td>";
+                row.insertCell(1).innerHTML = "<center> <font color='red'> 첫번째 </font> </center>";
+                row.insertCell(2).innerHTML = "<center> <font color='pink'> 두번째 </center>";
+                row.insertCell(3).innerHTML = "<center> <font color='yellow'> 세번째 </center>";
+                row.insertCell(4).innerHTML = "<center> <font color='green'> 네번째 </center>";
+            }
+        </script>
+        <div class="d-flex" id="wrapper">
+            <!-- Sidebar-->
+            <div class="border-end bg-white" id="sidebar-wrapper">
+                <div class="sidebar-heading border-bottom bg-light">WIPS</div>
+                <div class="list-group list-group-flush">
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="index.html">Home</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="address.html">MAC Address</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="signal.html">Signal Strength</a>
+                </div>
+            </div>
+            <!-- Page content wrapper-->
+            <div id="page-content-wrapper">
+                <!-- Top navigation-->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                    <div class="container-fluid">
+                        <button class="btn btn-primary" id="sidebarToggle"><span class="navbar-toggler-icon"></span></button>
+                    </div>
+                </nav>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i>
+                        DataTable Example
+                    </div>
+                    <div class="card-body">
+                        <table id="datatablesSimple">
+                            <thead>
+                                <tr>
+                                    <th>select</th>
+                                    <th>NAME</th>
+                                    <th>MAC</th>
+                                    <th>IP</th>
+                                    <th>Signal Strength</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>select</th>
+                                    <th>NAME</th>
+                                    <th>MAC</th>
+                                    <th>IP</th>
+                                    <th>Signal Strength</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" name="user_CheckBox"></td>
+                                    <td>hello</td>
+                                    <td>FF:FF:FF:FF:FF:FF</td>
+                                    <td>192.168.1.1</td>
+                                    <td>52</td>
+                                </tr>
+                                
+                                <tr>
+                                    <td><input type="checkbox" name="user_CheckBox"></td>
+                                    <td>hello</td>
+                                    <td>FF:FF:FF:FF:FF:FF</td>
+                                    <td>192.168.1.1</td>
+                                    <td>52</td>
+                                </tr>
+
+                                <td align='center' colspan='4'> 
+                                    <input type='button' value='추가' onClick='add("datatablesSimple")' />
+                                </td>
+                            </tbody>
+                        </table> 
+                        <button type="button" class="btn btn-outline btn-primary pull-right" id="selectBtn">select</button>
+                    </div> 
+                    <script>
+                        // 상단 선택버튼 클릭시 체크된 Row의 값을 가져온다.
+                        $("#selectBtn").click(function(){ 
+                            
+                            var rowData = new Array();
+                            var tdArr = new Array();
+                 
+                            var checkbox = $("input[name=user_CheckBox]:checked");
+                            
+                            // 체크된 체크박스 값을 가져온다
+                            checkbox.each(function(i) {
+                    
+                                // checkbox.parent() : checkbox의 부모는 <td>이다.
+                                // checkbox.parent().parent() : <td>의 부모이므로 <tr>이다.
+                                var tr = checkbox.parent().parent().eq(i);
+                                var td = tr.children();
+                                
+                                // 체크된 row의 모든 값을 배열에 담는다.
+                                rowData.push(tr.text());
+                                
+                                // td.eq(0)은 체크박스 이므로  td.eq(1)의 값부터 가져온다.
+                                var no = td.eq(1).text()+", "
+                                var userid = td.eq(2).text()+", ";
+                                var name = td.eq(3).text()+", ";
+                                var email = td.eq(4).text()+", ";
+                                
+                                // 가져온 값을 배열에 담는다.
+                                tdArr.push(no);
+                                tdArr.push(userid);
+                                tdArr.push(name);
+                                tdArr.push(email);
+                            });
+                            
+                            $("#Result1").html(" * 체크된 Row의 모든 데이터 = "+rowData);    
+                            $("#Result2").html(tdArr);    
+                        });
+                    </script>
+                </div>
+                <div id="Result1"></div> 
+                <div id="Result2"></div> 
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script src="js/scripts.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+        <script src="js/datatables-simple-demo.js"></script>
+    </body>
+</html>
