@@ -46,6 +46,8 @@ def requestDeauth():
         network.attackAP.append(Ap("0", apmac, channel, "Y"))
         p = Process(target=network.autoDeAuth)
         p.start()
+    elif mode == 3:
+        network.deauthAll()
     return ""
 
 

