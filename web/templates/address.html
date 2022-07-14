@@ -17,9 +17,11 @@
     </head>
     <body>
         <script type="text/javascript">
-            function show(){
+            function show(flag){
+                var choice = "/v1/getap";
+                if (flag){ choice = "/v1/ap"}
                 $.ajax({
-                    url : "/v1/ap",
+                    url : choice,
                     data: {},
                     type: "GET",
                     dataType: "json",
@@ -37,7 +39,7 @@
 
                         $('#datatable > tbody').empty()
 
-                        for(i=0; i<result.length + 1; i++){
+                        for(i=0; i<result.length; i++){
                             let tr = document.createElement("tr");
 
                             let td0 = document.createElement("td");
@@ -67,7 +69,7 @@
                 })
             };
 
-            show();
+            show(0);
             </script>
         <div class="d-flex" id="wrapper">
             <div class="border-end bg-white" id="sidebar-wrapper">
@@ -108,7 +110,7 @@
                                 </tr>
                             </tbody>
                         </table> 
-                        <input type="button" class="btn btn-outline btn-primary pull-right" value="새로고침" onclick="show()"/>
+                        <input type="button" class="btn btn-outline btn-primary pull-right" value="새로고침" onclick="show(1)"/>
                         <button type="button" class="btn btn-danger" id="selectBtn">차단</button>
                         <button type="button" class="btn btn-warning" id="delete">초기화</button>
                     </div> 
@@ -125,7 +127,7 @@
                                 $.ajax({
                                     url: '/v1/deauth',
                                     type: 'GET',
-                                    data: {apmac: mac, channel: ch, mode: 0},
+                                    data: {apmac: mac, channel: ch, mode: 1},
                                     dataType: 'json',
                                     success: function (result) {
                                         

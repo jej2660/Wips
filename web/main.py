@@ -1,11 +1,11 @@
 import random, json
-from multiprocess import Process
+from multiprocessing import Process
 from flask import Flask, render_template, request, Response, jsonify
 from network import *
 
 app = Flask(__name__)
 
-network = Network("wlan0mon")
+network = Network("wlan1")
 
 
 
@@ -26,6 +26,13 @@ def signalpage():
 def requestAp():
     network.updateApList()
     ls = network.getApList()
+    print(ls)
+    return jsonify(ls)
+@app.route("/v1/getap")
+def getAp():
+    ls = network.getApList()
+    if len(ls) == 0:
+        return requestAp()
     print(ls)
     return jsonify(ls)
 @app.route("/v1/signal", methods=["GET"])
@@ -55,6 +62,6 @@ def requestDeauth():
 
 
 if __name__ == "__main__":
-    p = Process(target=network.autoDeAuth)
-    p.start()
+    #p = Process(target=network.autoDeAuth)
+    #p.start()
     app.run()

