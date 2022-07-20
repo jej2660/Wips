@@ -2,26 +2,55 @@ import random, json
 from multiprocessing import Process
 from flask import Flask, render_template, request, Response, jsonify
 from network import *
+from firewall import *
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
 network = Network("wlan1")
-
+dbdao = dbDAO()
+block = Blocker(network)
+block_thread = Process(target=block.block)
+block_status = False
 
 
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    print(block_status)
+    return render_template("index.html", blcok_status=block_status)
 @app.route("/address")
 def address():
     return render_template("address.html")
 @app.route("/signal")
 def signalpage():
     return render_template("signal.html")
+@app.route("/block")
+def blcokpage():
+    return render_template("block.html")
+@app.route("/switch")
+def switch():
+    return render_template("switch.html", test="test")
 
 
 #API CALL
+
+
+@app.route("/v1/FirewallOff")
+def FirewallOff():
+    global block_status
+    block_status = False
+    block_thread.terminate()
+    return "Firewall Off"
+@app.route("/v1/FirewallOn")
+def FirewallOn():
+    global block_status, block_thread
+    block_status = True
+    block_thread = Process(target=block.block)
+    block_thread.start()
+    return "Firewall On"
+
+
+
 @app.route("/v1/ap")
 def requestAp():
     network.updateApList()
@@ -64,4 +93,4 @@ def requestDeauth():
 if __name__ == "__main__":
     #p = Process(target=network.autoDeAuth)
     #p.start()
-    app.run()
+    app.run(host="0.0.0.0", port=8080, debug=False)
