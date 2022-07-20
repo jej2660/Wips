@@ -51,7 +51,7 @@ class Network:
         self.target = adr
         self.rssList = []
         self.setChannel(channel)
-        sniff(iface=self.interface, prn=self.getRssi, count=50)
+        sniff(iface=self.interface, prn=self.getRssi, count=25)
         res = -100
         try:
             res = sum(self.rssList) / len(self.rssList)
