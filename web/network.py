@@ -65,11 +65,10 @@ class Network:
                 if pkt.haslayer(Dot11Beacon) or pkt.haslayer(Dot11ProbeResp):
                     if pkt.addr3 == self.target:
                         try:
-                            extra = pkt.notdecoded
-                            rssi = -(256-ord(extra[-4:-3]))
+                            rssi = pkt[RadioTap].dBm_AntSignal
                         except:
                             rssi = -100
-                        print(rssi, extra)
+                        print(rssi)
                         self.rssList.append(rssi)
 
     def setChannel(self, channel):
@@ -145,7 +144,7 @@ if __name__ == "__main__":
 
     network.hopStart()
     #print("dar", network.getPowerData("fc:7f:f1:b0:55:80", 6))
-#    network.getPowerData("fc:7f:f1:ae:80:e0", 11)
+    network.getPowerData("fc:7f:f1:ae:80:e0", 11)
     #network.deAuth("FF:FF:FF:FF:FF:FF", "90:9f:33:1b:13:aa", 1)
     #network.deAuth("FF:FF:FF:FF:FF:FF", "FF:FF:FF:FF:FF:FF", 1)
     #network.deAuth("08:AE:D6:01:98:5F", "90:9f:33:1b:13:aa", 1)

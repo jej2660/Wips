@@ -1,4 +1,4 @@
-$adap = "wlan1"
-ifconfig $adap down
-iwconfig $adap mode monitor
-ifconfig $adap up
+adap="wlan1"
+ifconfig wlan1 down
+iwconfig wlan1 mode monitor
+ifconfig wlan1 up
