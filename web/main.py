@@ -26,7 +26,8 @@ def signalpage():
     return render_template("signal.html")
 @app.route("/block")
 def blcokpage():
-    return render_template("block.html")
+    dbdao = dbDAO()
+    return render_template("block.html", block_list=dbdao.select())
 @app.route("/switch")
 def switch():
     return render_template("switch.html", test="test")
@@ -108,4 +109,4 @@ def requestDeauth():
 if __name__ == "__main__":
     #p = Process(target=network.autoDeAuth)
     #p.start()
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=False)

@@ -11,14 +11,19 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
         <link href="/static/css/styles.css" rel="stylesheet" />
+        <script src="/static/js/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
-            function show(){
-                $.ajax({
-                    url : "/v1/ap",
+        function show(flag){
+            var url = "/v1/ap"
+            if(flag == 1){
+                url = "/v1/getap"
+            }
+            $.ajax({
+                    url : url,
                     data: {},
                     type: "GET",
                     dataType: "json",
@@ -37,7 +42,7 @@
 
                         $('#table_ub > tbody_ub').empty()
 
-                        for(i=0; i<result.length + 1; i++){
+                        for(i=0; i<result.length; i++){
 
                             let tr = document.createElement("tr")
 
@@ -69,7 +74,7 @@
                 })
             };
 
-            show();
+            show(1);
         </script>
 
 
@@ -150,12 +155,20 @@
                                     <td></td>
                                     <td></td>
                                 </tr>
+                                {% for item in block_list %}
+                                <tr>
+                                    <td><input type="checkbox" id= {{ loop.index0 }} name="b_checkbox"></td>
+                                    <td>{{ item[0] }}</td>
+                                    <td>{{ item[1] }}</td>
+                                    <td>{{ item[2] }}</td>
+                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table> 
                     </div>
 
                     <div style="display:flex; flex-direction:column ; align-items: center; justify-content: center; float:left; width: 10%; ">
-                        <button type="button" style="border: 2px; width: 90px; height: 50px;">jj</button>
+                        <button type="button" style="border: 2px; width: 90px; height: 50px;" id="update_btn">Update</button>
                     </div>
 
                     
@@ -166,6 +179,34 @@
         </div>
 
         <script>
+            var updateInfo = new Array();
+            $("#update_btn").click(function(){
+                var checkbox = $("input[name=b_checkbox]")
+                
+                
+                checkbox.each(function(i) {
+                    
+                    var tr = checkbox.parent().parent().eq(i);
+                    var td = tr.children();
+                    
+                    var ssid = td.eq(1).text();
+                    var mac = td.eq(2).text();
+                    var ch = td.eq(3).text();
+                    var tmpjson = {"ssid": ssid, "mac": mac, "channel": ch};
+                    updateInfo.push(tmpjson);
+
+                });
+
+
+                $.ajax({
+                    url : "/v1/updateBlockList",
+                    data: JSON.stringify(updateInfo),
+                    contentType: "application/json",
+                    type: "POST",
+                    dataType: "json",
+                });
+            })
+
             $("#blockBtn").click(function(){ 
                 var checkbox = $("input[name=ub_checkbox]:checked");
 

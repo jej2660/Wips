@@ -40,7 +40,7 @@ class Blocker():
         self.dbdao = dbDAO()
         while True:
             self.net.updateApList()
-            whitelistAP = self.dbdao.getAllowTarget()
+            whitelistAP = self.dbdao.getDisallowTarget()
             white = set()
             for row in whitelistAP:
                 white.add(row[0])
