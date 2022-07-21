@@ -48,7 +48,22 @@ def FirewallOn():
     block_thread = Process(target=block.block)
     block_thread.start()
     return "Firewall On"
-
+@app.route("/v1/BlockList")
+def getBlockList():
+    dbdao = dbDAO()
+    rows = dbdao.select()
+    ls = []
+    for row in rows:
+        tmp = {"ssid": row[0], "mac": row[1], "channel": row[2]}
+        ls.append(tmp)
+    return jsonify(ls)
+@app.route("/v1/updateBlockList", methods= ["POST"])
+def updateBlockList():
+    data = request.get_json()
+    dbdao = dbDAO()
+    for row in data:
+        dbdao.insert(row['ssid'], row['mac'], row['channel'], 1)
+    return "True"
 
 
 @app.route("/v1/ap")
@@ -93,4 +108,4 @@ def requestDeauth():
 if __name__ == "__main__":
     #p = Process(target=network.autoDeAuth)
     #p.start()
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=8080, debug=True)

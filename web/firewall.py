@@ -19,6 +19,9 @@ class dbDAO():
     def getAllowTarget(self):
         self.cur.execute("SELECT MAC_ADDR FROM BLOCK_LIST WHERE flag=1")
         return self.cur.fetchall()
+    def getDisallowTarget(self):
+        self.cur.execute("SELECT MAC_ADDR FROM BLOCK_LIST WHERE flag=0")
+        return self.cur.fetchall()
     def delete(self, mac):
         self.cur.execute("DELETE FROM BLOCK_LIST WHERE mac_addr=?", (mac,))
         self.con.commit()
@@ -53,5 +56,6 @@ class Blocker():
 
 
 if __name__ == "__main__":
-    blocker = Blocker(Network("wlan1"))
-    blocker.block()
+    dbdao = dbDAO()
+    data = dbdao.select()
+    print(data)
