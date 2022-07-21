@@ -8,6 +8,8 @@
 * 무선 환경에서 사용가능한 방화벽 도입
 * 라즈베리파이 포팅 및 모니터 모드가 가능한 무선 랜카드로 소규모 wips 구현
 * Block List page 구현
+* 알고리즘 및 코드 리펙토링
+* UI/UX 개선
 
 ## How to start
 
@@ -18,9 +20,9 @@
 
 ```bash
 $ pip install requirement.txt
-$ sudo ./setup.sh
 $ cd ./web
-$ sudo python ./main.py flask run
+$ sh ./monitor.sh
+$ sudo python ./main.py
 ```
 
 ## License
